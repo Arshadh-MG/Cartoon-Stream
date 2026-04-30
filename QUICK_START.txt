@@ -1,0 +1,48 @@
+Cartoon Streaming Platform - Quick Start
+
+1. Install Python dependencies
+
+   On Linux/macOS:
+   ```bash
+   bash setup.sh
+   ```
+
+   On Windows PowerShell:
+   ```powershell
+   .\setup.ps1
+   ```
+
+2. Start the backend
+
+   ```bash
+   python backend_main.py
+   ```
+
+3. Create the React frontend
+
+   ```bash
+   npx create-react-app cartoon-streaming
+   cd cartoon-streaming
+   npm install lucide-react
+   ```
+
+4. Copy the frontend component
+
+   - Replace `src/App.js` with the contents of `cartoon-streaming-frontend.jsx`.
+
+5. Start the React app
+
+   ```bash
+   npm start
+   ```
+
+6. Open the app
+
+   - Frontend: `http://localhost:3000`
+   - Backend docs: `http://localhost:8000/docs`
+
+## Notes
+
+- Uploaded videos are served from `uploads/videos/`.
+- The SQLite file is `cartoons.db`.
+- Use the Admin Panel button in the frontend to manage content.
