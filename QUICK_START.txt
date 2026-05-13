@@ -1,0 +1,113 @@
+Cartoon Streaming Platform - Quick Start (Vite + Supabase)
+
+=== SETUP ===
+
+1. Install Node.js dependencies:
+   npm install
+
+2. Create .env from .env.example:
+   cp .env.example .env
+
+3. Set up Supabase:
+   - Create a free project at https://supabase.com
+   - Copy your project URL and API key from the dashboard
+   - Paste into .env:
+     VITE_SUPABASE_URL=your-project-url
+     VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+
+4. Initialize Supabase tables:
+   - Go to Supabase Dashboard → SQL Editor
+   - Copy and paste the entire contents of supabase-schema.sql
+   - Click "Run" to create tables and storage
+
+5. Set yourself as admin (to upload content):
+   - In Supabase Dashboard → Authentication → Users
+   - Click your user → Edit user
+   - In app_metadata, add: {"role": "admin"}
+
+=== RUN ===
+
+Development server:
+   npm run dev
+   → Open http://localhost:5173
+
+Production build:
+   npm run build
+   → Output is in dist/
+
+=== PAGES ===
+
+- /                → Homepage with featured cartoons
+- /browse          → Browse all cartoons by category
+- /watch/:id       → Watch an episode
+- /upload          → Upload new cartoons (admin only, requires Supabase + auth)
+- /admin/videos    → Manage uploads (admin only)
+- /my-list         → Your saved episodes (localStorage)
+- /feedback        → Send feedback
+
+=== SUPABASE FEATURES ===
+
+✓ Dynamic cartoons/categories/episodes
+✓ File uploads for videos and thumbnails
+✓ Admin role-based access control (RLS policies)
+✓ Public read, admin-only write
+✓ Production-ready database
+
+=== FALLBACK MODE ===
+
+If Supabase is not configured:
+- The app still works using sample data
+- Upload/admin pages show "Supabase not configured"
+- Good for local development or demo
+
+=== DEPLOYMENT ===
+
+Vercel (recommended):
+   1. npm run build
+   2. Push to GitHub
+   3. Connect GitHub repo to Vercel
+   4. Add .env secrets in Vercel dashboard
+   5. Deploy
+
+Netlify:
+   1. npm run build
+   2. Add _redirects file to public/:
+      /*    /index.html   200
+   3. Deploy dist/ folder
+
+Any static host (GitHub Pages, etc.):
+   1. npm run build
+   2. Upload dist/ folder
+   3. Configure 404 handling to serve index.html
+
+=== TROUBLESHOOTING ===
+
+"Episode not found" error:
+   → Check supabase-schema.sql was run in SQL Editor
+   → Verify .env has correct VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY
+   → Restart dev server after changing .env
+
+Videos don't play:
+   → Check video URLs are valid and accessible
+   → Ensure videos are H.264 MP4 or WebM format
+   → Check browser console for CORS errors
+
+Can't upload content:
+   → Make sure you're an admin (app_metadata.role = 'admin')
+   → Check that Supabase environment variables are set in .env
+   → Verify tables and storage bucket exist in Supabase
+
+=== SECURITY ===
+
+- .env is in .gitignore (never commit real credentials)
+- Use .env.example for template with placeholders
+- RLS policies enforce admin-only writes
+- VITE_SUPABASE_PUBLISHABLE_KEY is intentionally public
+- Keep your Supabase project settings private
+
+=== SUPPORT ===
+
+- Supabase docs: https://supabase.com/docs
+- Vite docs: https://vitejs.dev
+- React docs: https://react.dev
+- GitHub issues: Report bugs on the project repo
