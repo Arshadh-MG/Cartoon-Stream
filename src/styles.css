@@ -2446,6 +2446,124 @@ html[data-theme="light"] .form-message.error {
   }
 }
 
+/* Upload Mode Selector Styles */
+.upload-mode-selector {
+  margin-bottom: 24px;
+  margin-top: 12px;
+}
+
+.upload-mode-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.upload-mode-option {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: var(--bg-raised);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text);
+}
+
+.upload-mode-option:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: var(--bg-soft);
+  transform: translateY(-2px);
+}
+
+.upload-mode-option.active {
+  border-color: var(--green);
+  background: rgba(69, 230, 106, 0.1);
+  box-shadow: 0 0 12px rgba(69, 230, 106, 0.2);
+}
+
+.mode-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mode-content {
+  display: grid;
+  gap: 4px;
+}
+
+.mode-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.mode-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Iframe Player Styles */
+.iframe-player-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.iframe-video {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.iframe-native-controls-info {
+  padding: 12px 16px;
+  background: rgba(69, 230, 106, 0.15);
+  border: 1px solid rgba(69, 230, 106, 0.3);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .upload-mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-mode-option {
+    grid-template-columns: 40px 1fr;
+  }
+
+  .mode-icon {
+    font-size: 1.8rem;
+  }
+
+  .mode-title {
+    font-size: 0.95rem;
+  }
+
+  .mode-desc {
+    font-size: 0.8rem;
+  }
+
+  .iframe-player-container {
+    min-height: 300px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

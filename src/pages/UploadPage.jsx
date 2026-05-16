@@ -13,6 +13,8 @@ const defaultValues = {
   episodeNumber: 1,
   episodeName: '',
   episodeDescription: '',
+  uploadMode: 'file', // 'file' or 'iframe'
+  iframeUrl: '',
 };
 
 function cleanFileName(name) {
@@ -232,17 +234,42 @@ export default function UploadPage({ user }) {
     try {
       if (!user) throw new Error('Sign in with your admin username and password first.');
       if (!isReady) throw new Error(connection.message);
-      if (!videoFile) throw new Error('Choose a local video file to upload.');
       if (!form.episodeName.trim()) throw new Error('Enter an episode title.');
+
+      const uploadMode = form.uploadMode || 'file';
+      
+      if (uploadMode === 'file' && !videoFile) {
+        throw new Error('Choose a local video file to upload.');
+      }
+      if (uploadMode === 'iframe' && !form.iframeUrl.trim()) {
+        throw new Error('Enter an iframe embed link.');
+      }
 
       const cartoonId = await ensureCartoon();
       const categoryId = await ensureCategory(cartoonId);
-      const stamp = `${Date.now()}-${user.id ?? 'admin'}`;
-      const videoPath = `videos/${cartoonId}/${stamp}-${cleanFileName(videoFile.name)}`;
-      const thumbnailPath = thumbnailFile ? `thumbnails/${cartoonId}/${stamp}-${cleanFileName(thumbnailFile.name)}` : null;
 
-      const videoUrl = await uploadAsset(videoPath, videoFile);
-      const thumbnailUrl = thumbnailFile ? await uploadAsset(thumbnailPath, thumbnailFile) : null;
+      let videoUrl = null;
+      let videoDurationToSave = videoDuration || 1320;
+
+      if (uploadMode === 'file') {
+        // Upload file to Supabase Storage
+        const stamp = `${Date.now()}-${user.id ?? 'admin'}`;
+        const videoPath = `videos/${cartoonId}/${stamp}-${cleanFileName(videoFile.name)}`;
+        videoUrl = await uploadAsset(videoPath, videoFile);
+      } else {
+        // Use iframe URL directly
+        videoUrl = form.iframeUrl.trim();
+        // For iframe, estimate duration if not set
+        videoDurationToSave = videoDuration || 1320;
+      }
+
+      // Upload thumbnail if provided
+      let thumbnailUrl = null;
+      if (thumbnailFile) {
+        const stamp = `${Date.now()}-${user.id ?? 'admin'}`;
+        const thumbnailPath = `thumbnails/${cartoonId}/${stamp}-${cleanFileName(thumbnailFile.name)}`;
+        thumbnailUrl = await uploadAsset(thumbnailPath, thumbnailFile);
+      }
 
       if (selectedCartoon === 'new' && thumbnailUrl && !form.imageUrl.trim()) {
         await supabase.from('cartoons').update({ image_url: thumbnailUrl }).eq('id', cartoonId);
@@ -254,15 +281,20 @@ export default function UploadPage({ user }) {
         episode_number: Number(form.episodeNumber) || 1,
         name: form.episodeName.trim(),
         description: form.episodeDescription.trim(),
-        duration: videoDuration || 1320,
+        duration: videoDurationToSave,
         video_url: videoUrl,
+        ...(uploadMode && { video_type: uploadMode }), // Only include if column exists
         thumbnail_url: thumbnailUrl,
         views: 0,
       });
 
       if (episodeError) throw new Error(episodeError.message);
 
-      setMessage('Upload successful. The episode is saved in Supabase and will appear on the website.');
+      const successMsg = uploadMode === 'iframe' 
+        ? 'Iframe link saved successfully. The episode will appear on the website.'
+        : 'Upload successful. The episode is saved in Supabase and will appear on the website.';
+      
+      setMessage(successMsg);
       setForm(defaultValues);
       setVideoFile(null);
       setVideoDuration(0);
@@ -376,10 +408,56 @@ export default function UploadPage({ user }) {
               </label>
             </div>
 
-            <label>
-              Local video file
-              <input type="file" accept="video/*" onChange={(event) => handleVideoFileChange(event.target.files?.[0] ?? null)} required />
-            </label>
+            <div className="upload-mode-selector">
+              <div className="upload-mode-options">
+                <button
+                  type="button"
+                  className={`upload-mode-option ${form.uploadMode === 'file' ? 'active' : ''}`}
+                  onClick={() => updateField('uploadMode', 'file')}
+                >
+                  <div className="mode-icon">📁</div>
+                  <div className="mode-content">
+                    <div className="mode-title">Upload local video file</div>
+                    <div className="mode-desc">Upload from your computer to Supabase</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  className={`upload-mode-option ${form.uploadMode === 'iframe' ? 'active' : ''}`}
+                  onClick={() => updateField('uploadMode', 'iframe')}
+                >
+                  <div className="mode-icon">🔗</div>
+                  <div className="mode-content">
+                    <div className="mode-title">Add iframe link</div>
+                    <div className="mode-desc">Host externally (Blogger, YouTube, etc.)</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {form.uploadMode === 'file' && (
+              <label>
+                Local video file
+                <input type="file" accept="video/*" onChange={(event) => handleVideoFileChange(event.target.files?.[0] ?? null)} required />
+              </label>
+            )}
+
+            {form.uploadMode === 'iframe' && (
+              <label>
+                Iframe embed link
+                <input 
+                  type="text" 
+                  value={form.iframeUrl} 
+                  onChange={(event) => updateField('iframeUrl', event.target.value)}
+                  placeholder='e.g., <iframe src="https://..."></iframe>'
+                  required 
+                />
+                <small style={{ display: 'block', marginTop: '6px', color: '#666' }}>
+                  Paste the full iframe HTML code or just the src URL
+                </small>
+              </label>
+            )}
+            
             <label>
               Thumbnail image
               <input type="file" accept="image/*" onChange={(event) => setThumbnailFile(event.target.files?.[0] ?? null)} />

@@ -28,6 +28,7 @@ create table if not exists public.episodes (
   description text default '',
   duration integer default 1320,
   video_url text not null,
+  video_type text default 'file',
   thumbnail_url text default '',
   views integer default 0,
   audio_languages text[] default array['English', 'Tamil', 'Hindi'],
